@@ -8,7 +8,6 @@ import java.nio.file.Path;
 
 public class PuzzleGUI extends JFrame{
     BufferedImage image;    //full image
-    //TODO: recheck Array in Java: is that length = 16 or highest index = 16?
     ImageIcon[] tileIcons = new ImageIcon[16]; //parts of the full image, index corresponds to the tile number
     Dimension imageSize;
     Dimension windowSize;
@@ -31,19 +30,20 @@ public class PuzzleGUI extends JFrame{
         //TODO: add the extra space needed for margins between the tiles
         windowSize = imageSize;
 
-
         //window settings
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.getContentPane().setBackground(Color.darkGray);
         this.setSize(windowSize);
-        this.setLayout(new GridLayout(4,4));
+
+        this.setLayout(new GridLayout(4,4,0,0));
+
 
         //generate tile icons
         int boardWidth = puzzleState.boardSize.width;
         int boardHeight = puzzleState.boardSize.height;
         int tileWidth = imageSize.width/boardWidth;
         int tileHeight = imageSize.height/boardHeight;
-        for (int i = 0; i <= 15; i++){
+        for (int i = 0; i < 16; i++){
             int x = (i%puzzleState.boardSize.width)*(tileWidth);
             int y = (i/puzzleState.boardSize.height)*(tileHeight);
             tileIcons[i] = new ImageIcon(image.getSubimage(x,y,tileWidth,tileHeight));
@@ -52,10 +52,14 @@ public class PuzzleGUI extends JFrame{
     }
 
     public void renderGUI(){
-        //draw tiles
-        for (ImageIcon icon: tileIcons){
-            System.out.println("adding icon");
-            this.add(new GameTile(icon));
+
+        //for testing purposes
+        //puzzleState.moveTile(new Point(3,2));
+
+        //draw tiles according to the board state in puzzleState
+        int[] drawOrder = puzzleState.getTileDrawOrder();
+        for (int i = 0; i < drawOrder.length; i++) {
+            this.add(new GameTile(tileIcons[drawOrder[i]], drawOrder[i]));
         }
 
         //set window to visible
@@ -64,6 +68,7 @@ public class PuzzleGUI extends JFrame{
 
     /**
     * Reads and returns the image located at imagePath.
+    * imagePath: absolute path to the image which will be used as the puzzle.
     */
     private BufferedImage loadImage(Path imagePath){
         BufferedImage loadedImage = null;
@@ -72,7 +77,6 @@ public class PuzzleGUI extends JFrame{
         System.out.printf("File exists: %s\n",file.exists());
         try{
             loadedImage = ImageIO.read(file);
-            //TODO: why does ImageIO.read need the getResource function?
         }catch(IOException e){
             System.err.println(e.getMessage());
         }
@@ -84,16 +88,19 @@ public class PuzzleGUI extends JFrame{
      * A JPanel which draws the part of the full image corresponding to its tile number.
      * */
     private class GameTile extends JPanel {
-        //TODO: finish moving image cropping outside of this class
-        //Point imageTileCorner; //the x,y coordinates of the tiles' top left corner on the original image
         ImageIcon icon;
-        JLabel label;
+        JLabel picture;
+        int tileNumber;
 
-        public GameTile(ImageIcon icon) {
+        public GameTile(ImageIcon icon, int tileNumber) {
             this.icon = icon;
-            label = new JLabel(icon);
+            picture = new JLabel(icon);
+            this.tileNumber = tileNumber;
 
-            this.add(label);
+            this.add(picture);
+
+            //for debug purposes to track which tile is which
+            this.add(new JLabel(String.valueOf(this.tileNumber)));
         }
     }
 }
