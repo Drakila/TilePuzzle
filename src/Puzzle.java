@@ -23,26 +23,21 @@ public class Puzzle {
         //TODO: fix non-4x4 square puzzles not working (render and turns)
         //TODO: fix non-square puzzles not working (render and turns)
         this.boardSize = boardSize;
-        initialize();
+
+        tileLocations = new int[boardSize.width][boardSize.height];
+        emptyTile = new Point(boardSize.width-1, boardSize.height-1);
+        sortBoard();
+
         /* Puzzle puzzle = new Puzzle();
         puzzle.loadImage();
         puzzle.displayGUI(new Dimension(500,500));*/
     }
 
-    private void initialize(){
-        //initialize tile positions, sorted
-        //TODO: initialize with a random order. How to generate integers 0-x without repeats?
-        tileLocations = new int[boardSize.width][boardSize.height];
+    protected void sortBoard(){
         for (int i = 0; i < (boardSize.width * boardSize.height); i++) {
             tileLocations[i/ boardSize.width][i% boardSize.height] = i;
         }
-        emptyTile = new Point(boardSize.width-1, boardSize.height-1);
-
-
-    }
-
-    protected void sortBoard(){
-        //TODO: implement sorting
+        emptyTile.setLocation(boardSize.width-1, boardSize.height-1);
 
     }
 
