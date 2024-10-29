@@ -9,7 +9,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 public class PuzzleGUI extends JFrame{
     //TODO: instead of calling updateGUI() manually, is it possible to watch puzzleState.tileLocations and trigger a redraw whenever that changes?
