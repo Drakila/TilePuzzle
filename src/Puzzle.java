@@ -22,10 +22,6 @@ public class Puzzle {
         tileLocations = new int[boardSize.width][boardSize.height];
         emptyTile = new Point(boardSize.width-1, boardSize.height-1);
         sortBoard();
-
-        /* Puzzle puzzle = new Puzzle();
-        puzzle.loadImage();
-        puzzle.displayGUI(new Dimension(500,500));*/
     }
 
     protected void sortBoard(){
@@ -37,7 +33,7 @@ public class Puzzle {
     }
 
     protected void randomizeBoard(){
-        ArrayList<Integer> numberRange = new ArrayList<Integer>(boardSize.width* boardSize.height);
+        ArrayList<Integer> numberRange = new ArrayList<>(boardSize.width* boardSize.height);
         for (int i = 0; i < boardSize.width* boardSize.height; i++) {
             numberRange.add(i);
         }
@@ -72,9 +68,8 @@ public class Puzzle {
     protected int[] getTileDrawOrder(){
         int[] result = new int[boardSize.width * boardSize.height];
         for (int i = 0; i < boardSize.width; i++) {
-            for (int j = 0; j < boardSize.height; j++) {
-                result[(i * boardSize.width) + j] = tileLocations[i][j] ;
-            }
+            if (boardSize.height >= 0)
+                System.arraycopy(tileLocations[i], 0, result, (i * boardSize.width), boardSize.height);
 
         }
         return result;
