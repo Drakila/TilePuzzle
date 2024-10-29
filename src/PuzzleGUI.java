@@ -1,14 +1,21 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 public class PuzzleGUI extends JFrame{
+    //TODO: instead of calling updateGUI() manually, is it possible to watch puzzleState.tileLocations and trigger a redraw whenever that changes?
     BufferedImage image;    //full image
-    ImageIcon[] tileIcons = new ImageIcon[16]; //parts of the full image, index corresponds to the tile number
+    int tileAmount;
+    ImageIcon[] tileIcons; //parts of the full image, index corresponds to the tile number
     Dimension imageSize;
     Dimension windowSize;
     // reference to assigned Puzzle instance which manages the board state
@@ -18,6 +25,8 @@ public class PuzzleGUI extends JFrame{
         //NOTE: this is one beefy constructor
 
         this.puzzleState = puzzleState;
+
+        this.tileAmount = puzzleState.boardSize.height * puzzleState.boardSize.width;
 
         //load image
         image = loadImage(imagePath);
@@ -39,15 +48,18 @@ public class PuzzleGUI extends JFrame{
 
 
         //generate tile icons
+        this.tileIcons = new ImageIcon[tileAmount];
+
         int boardWidth = puzzleState.boardSize.width;
         int boardHeight = puzzleState.boardSize.height;
         int tileWidth = imageSize.width/boardWidth;
         int tileHeight = imageSize.height/boardHeight;
-        for (int i = 0; i < 16; i++){
+        for (int i = 0; i < (tileIcons.length -1); i++){
             int x = (i%puzzleState.boardSize.width)*(tileWidth);
             int y = (i/puzzleState.boardSize.height)*(tileHeight);
             tileIcons[i] = new ImageIcon(image.getSubimage(x,y,tileWidth,tileHeight));
         }
+        tileIcons[tileIcons.length-1] = new ImageIcon(new BufferedImage(tileWidth, tileHeight, 5));
 
     }
 
@@ -58,12 +70,18 @@ public class PuzzleGUI extends JFrame{
 
         //draw tiles according to the board state in puzzleState
         int[] drawOrder = puzzleState.getTileDrawOrder();
-        for (int i = 0; i < drawOrder.length; i++) {
-            this.add(new GameTile(tileIcons[drawOrder[i]], drawOrder[i]));
+        for (int j : drawOrder) {
+            this.add(new GameTile(tileIcons[j], j));
         }
 
         //set window to visible
         this.setVisible(true);
+    }
+
+    private void updateGUI(){
+        //TODO: figure out a more efficient way than remaking and adding ALL tiles on EVERY turn. Maybe use GridBagLayout?
+        this.getContentPane().removeAll();
+        renderGUI();
     }
 
     /**
@@ -87,7 +105,7 @@ public class PuzzleGUI extends JFrame{
     /**
      * A JPanel which draws the part of the full image corresponding to its tile number.
      * */
-    private class GameTile extends JPanel {
+    private class GameTile extends JPanel implements MouseListener {
         ImageIcon icon;
         JLabel picture;
         int tileNumber;
@@ -97,10 +115,45 @@ public class PuzzleGUI extends JFrame{
             picture = new JLabel(icon);
             this.tileNumber = tileNumber;
 
+            picture.addMouseListener(this);
             this.add(picture);
+
+
 
             //for debug purposes to track which tile is which
             this.add(new JLabel(String.valueOf(this.tileNumber)));
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            //find tile coordinates by tile number
+
+            System.out.printf("Tile nr. %s was clicked\n", tileNumber);
+            Point tileLocation = puzzleState.getTileByNumber(tileNumber);
+
+            puzzleState.moveTile(tileLocation);
+
+            updateGUI();
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            //do nothing
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            //do nothing
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            //TODO: highlight tile in some fashion?
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            //TODO: un-highlight tile
         }
     }
 }
