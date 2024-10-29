@@ -47,8 +47,6 @@ public class Puzzle {
     }
 
     protected void randomizeBoard(){
-        //TODO: implement randomization
-
         ArrayList<Integer> numberRange = new ArrayList<Integer>(boardSize.width* boardSize.height);
         for (int i = 0; i < boardSize.width* boardSize.height; i++) {
             numberRange.add(i);
@@ -58,6 +56,10 @@ public class Puzzle {
         for (int i = 0; i < (boardSize.width * boardSize.height); i++) {
             tileLocations[i/ boardSize.width][i% boardSize.height] = numberRange.get(i);
         }
+
+        //update empty tile position
+        int index = numberRange.indexOf( (boardSize.width* boardSize.height)-1);
+        emptyTile.setLocation(index/boardSize.width, index%boardSize.width);
 
 
     }
@@ -69,7 +71,7 @@ public class Puzzle {
             //swap with empty tile
             tileLocations[emptyTile.x][emptyTile.y] = tileLocations[tileLocation.x][tileLocation.y];
             emptyTile.setLocation(tileLocation.x, tileLocation.y);
-            tileLocations[tileLocation.x][tileLocation.y] = 15;
+            tileLocations[tileLocation.x][tileLocation.y] = (boardSize.height * boardSize.width) -1;
         }
 
     }
