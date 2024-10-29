@@ -6,6 +6,6 @@ public class Main {
     public static void main(String[] args){
         Puzzle puzzleState = new Puzzle(new Dimension(4,4));
         PuzzleGUI puzzleGUI = new PuzzleGUI(Path.of(args[0]), puzzleState);
-        puzzleGUI.renderGUI();
+
     }
 }

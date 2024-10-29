@@ -21,6 +21,9 @@ public class PuzzleGUI extends JFrame{
     // reference to assigned Puzzle instance which manages the board state
     Puzzle puzzleState;
 
+    GameBoard puzzlePanel;
+    ControlPanel controlPanel;
+
     public PuzzleGUI(Path imagePath, Puzzle puzzleState){
         //NOTE: this is one beefy constructor
 
@@ -33,19 +36,6 @@ public class PuzzleGUI extends JFrame{
 
         //determine image size
         imageSize = new Dimension(image.getWidth(this), image.getHeight(this));
-
-        //determine window size
-        //TODO: set a maximum window size and scale image down if needed
-        //TODO: add the extra space needed for margins between the tiles
-        windowSize = imageSize;
-
-        //window settings
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        this.getContentPane().setBackground(Color.darkGray);
-        this.setSize(windowSize);
-
-        this.setLayout(new GridLayout(4,4,0,0));
-
 
         //generate tile icons
         this.tileIcons = new ImageIcon[tileAmount];
@@ -61,27 +51,28 @@ public class PuzzleGUI extends JFrame{
         }
         tileIcons[tileIcons.length-1] = new ImageIcon(new BufferedImage(tileWidth, tileHeight, 5));
 
-    }
+        //determine window size
+        //TODO: set a maximum window size and scale image down if needed
+        //TODO: add the extra space needed for margins between the tiles
+        windowSize = new Dimension(imageSize.width + 100, imageSize.height + 200);
 
-    public void renderGUI(){
+        //window settings
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.getContentPane().setBackground(Color.darkGray);
+        this.setSize(windowSize);
+        //getContentPane is necessary because setLayout automatically sets the Layout for the content pane, not the JFrame
+        //and the target needs to match ala "target.setLayout(new BoxLayout(target, axis))"
+        this.setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
 
-        //for testing purposes
-        //puzzleState.moveTile(new Point(3,2));
+        //construct window layout
+        puzzlePanel = new GameBoard();
+        controlPanel = new ControlPanel(puzzlePanel);
 
-        //draw tiles according to the board state in puzzleState
-        int[] drawOrder = puzzleState.getTileDrawOrder();
-        for (int j : drawOrder) {
-            this.add(new GameTile(tileIcons[j], j));
-        }
+        this.add(puzzlePanel);
+        this.add(controlPanel);
 
-        //set window to visible
         this.setVisible(true);
-    }
 
-    private void updateGUI(){
-        //TODO: figure out a more efficient way than remaking and adding ALL tiles on EVERY turn. Maybe use GridBagLayout?
-        this.getContentPane().removeAll();
-        renderGUI();
     }
 
     /**
@@ -103,17 +94,44 @@ public class PuzzleGUI extends JFrame{
     }
 
     /**
+     * Panel which displays the current state of the puzzle using GameTiles
+     * */
+    private class GameBoard extends JPanel{
+        public GameBoard(){
+            this.setLayout(new GridLayout(4,4,0,0));
+
+            update();
+        }
+
+        /**
+         * Trigger a redraw of the game board.
+         * */
+        private void update(){
+            this.removeAll();
+
+            int[] drawOrder = puzzleState.getTileDrawOrder();
+            for (int j : drawOrder) {
+                this.add(new GameTile(tileIcons[j], j, this));
+            }
+
+            this.revalidate();
+        }
+    }
+
+    /**
      * A JPanel which draws the part of the full image corresponding to its tile number.
      * */
     private class GameTile extends JPanel implements MouseListener {
         ImageIcon icon;
         JLabel picture;
         int tileNumber;
+        GameBoard gameBoard;
 
-        public GameTile(ImageIcon icon, int tileNumber) {
+        public GameTile(ImageIcon icon, int tileNumber, GameBoard gameBoard) {
             this.icon = icon;
             picture = new JLabel(icon);
             this.tileNumber = tileNumber;
+            this.gameBoard = gameBoard;
 
             picture.addMouseListener(this);
             this.add(picture);
@@ -121,7 +139,7 @@ public class PuzzleGUI extends JFrame{
 
 
             //for debug purposes to track which tile is which
-            this.add(new JLabel(String.valueOf(this.tileNumber)));
+            //this.add(new JLabel(String.valueOf(this.tileNumber)));
         }
 
         @Override
@@ -133,7 +151,7 @@ public class PuzzleGUI extends JFrame{
 
             puzzleState.moveTile(tileLocation);
 
-            updateGUI();
+            gameBoard.update();
         }
 
         @Override
@@ -154,6 +172,35 @@ public class PuzzleGUI extends JFrame{
         @Override
         public void mouseExited(MouseEvent e) {
             //TODO: un-highlight tile
+        }
+    }
+
+    private class ControlPanel extends JPanel implements ActionListener{
+        JButton shuffleButton;
+        JButton sortButton;
+        GameBoard controlledGame;
+        public ControlPanel(GameBoard controlledGame){
+            this.controlledGame = controlledGame;
+
+            shuffleButton = new JButton("Start");
+            shuffleButton.addActionListener(this);
+            sortButton = new JButton("Sort");
+            sortButton.addActionListener(this);
+
+            this.add(shuffleButton);
+            this.add(sortButton);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Object source = e.getSource();
+            if (source == shuffleButton){
+                puzzleState.randomizeBoard();
+                controlledGame.update();
+            } else if (source == sortButton) {
+                puzzleState.sortBoard();
+                controlledGame.update();
+            }
         }
     }
 }

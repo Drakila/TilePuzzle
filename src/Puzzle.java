@@ -41,12 +41,12 @@ public class Puzzle {
 
     }
 
-    private void sortBoard(){
+    protected void sortBoard(){
         //TODO: implement sorting
 
     }
 
-    private void randomizeBoard(){
+    protected void randomizeBoard(){
         //TODO: implement randomization
 
         ArrayList<Integer> numberRange = new ArrayList<Integer>(boardSize.width* boardSize.height);
