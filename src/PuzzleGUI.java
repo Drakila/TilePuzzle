@@ -96,35 +96,72 @@ public class PuzzleGUI extends JFrame{
      * Panel which displays the current state of the puzzle using GameTiles
      * */
     private class GameBoard extends JPanel{
+        //list of tiles on the board, in order of tileNumber
+        final GameTile[] tileList = new GameTile[16];
+
         public GameBoard(){
             this.setLayout(new GridLayout(4,4,0,0));
 
-            update();
+            //generate list of GameTiles
+            int tileAmount = puzzleState.boardSize.height * puzzleState.boardSize.width;
+            for (int i = 0; i < tileAmount; i++) {
+                tileList[i] = new GameTile(tileIcons[i], i, this);
+            }
+
+            //add GameTiles to the board in the current order
+            int[] drawOrder = puzzleState.getTileDrawOrder();
+            for (int j : drawOrder) {
+                this.add(tileList[j]);
+            }
         }
 
         /**
-         * Trigger a redraw of the game board.
+         * Trigger a complete redraw of the game board.
          * */
-        private void update(){
+        private void redraw(){
             this.removeAll();
 
             int[] drawOrder = puzzleState.getTileDrawOrder();
             for (int j : drawOrder) {
-                this.add(new GameTile(tileIcons[j], j, this));
+                GameTile newTile = new GameTile(tileIcons[j], j, this);
+                //update the order of tileList
+                tileList[j] = newTile;
+                this.add(newTile);
             }
+
+            this.revalidate();
+        }
+
+        /**
+         * Updates the game tile numbers and pictures to fake the tile moving.
+         * @param tileNumber Number of the tile that swapped places with the empty tile.
+         */
+        private void renderMove(int tileNumber){
+            //swap the tile with the empty tile by changing their picture and tileNumber
+            GameTile tile = tileList[tileNumber];
+            GameTile emptyTile = tileList[15];
+
+            ImageIcon emptyImage = emptyTile.icon;
+
+            emptyTile.update(tile.icon, tile.tileNumber);
+            tile.update(emptyImage, 15);
+
+            //maintain order of tileList
+            tileList[tileNumber] = emptyTile;
+            tileList[15] = tile;
 
             this.revalidate();
         }
     }
 
     /**
-     * A JPanel which draws the part of the full image corresponding to its tile number.
+     * A JPanel which represents one tile in the game. Draws the part of the full image corresponding to its tile number.
      * */
     private class GameTile extends JPanel implements MouseListener {
         ImageIcon icon;
         JLabel picture;
         int tileNumber;
-        GameBoard gameBoard;
+        final GameBoard gameBoard;
 
         public GameTile(ImageIcon icon, int tileNumber, GameBoard gameBoard) {
             this.icon = icon;
@@ -135,22 +172,38 @@ public class PuzzleGUI extends JFrame{
             picture.addMouseListener(this);
             this.add(picture);
 
-
-
             //for debug purposes to track which tile is which
             //this.add(new JLabel(String.valueOf(this.tileNumber)));
         }
 
+        /**
+         * Changes the Icon and Tile number, making this GameTile object represent a different actual tile than before.
+         * This allows fake movement of the game tiles.
+         * @param icon new image to overwrite the old one with
+         * @param tileNumber new tile number
+         */
+        private void update(ImageIcon icon, int tileNumber){
+            this.icon = icon;
+            this.tileNumber = tileNumber;
+
+            picture = new JLabel(icon);
+            picture.addMouseListener(this);
+
+            this.removeAll();
+            this.add(picture);
+        }
+
         @Override
         public void mouseClicked(MouseEvent e) {
-            //find tile coordinates by tile number
 
-            System.out.printf("Tile nr. %s was clicked\n", tileNumber);
+            //find tile coordinates by tile number
+            //System.out.printf("Tile nr. %s was clicked\n", tileNumber);
             Point tileLocation = puzzleState.getTileByNumber(tileNumber);
 
-            puzzleState.moveTile(tileLocation);
+            if (puzzleState.moveTile(tileLocation)) {
+                gameBoard.renderMove(tileNumber);
+            }
 
-            gameBoard.update();
         }
 
         @Override
@@ -195,10 +248,10 @@ public class PuzzleGUI extends JFrame{
             Object source = e.getSource();
             if (source == shuffleButton){
                 puzzleState.randomizeBoard();
-                controlledGame.update();
+                controlledGame.redraw();
             } else if (source == sortButton) {
                 puzzleState.sortBoard();
-                controlledGame.update();
+                controlledGame.redraw();
             }
         }
     }

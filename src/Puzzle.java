@@ -50,7 +50,12 @@ public class Puzzle {
 
     }
 
-    protected void moveTile(Point tileLocation){
+    /**
+     * Move the targeted tile into the empty spot if it is adjacent to it.
+     * @param tileLocation Location of the tile attempting a move
+     * @return true if move was legal, false if move was illegal
+     */
+    protected boolean moveTile(Point tileLocation){
         int distance = Math.abs(tileLocation.x - emptyTile.x) + (Math.abs(tileLocation.y - emptyTile.y));
         if (1 == distance){
             // tile is adjacent to the empty tile
@@ -58,12 +63,15 @@ public class Puzzle {
             tileLocations[emptyTile.x][emptyTile.y] = tileLocations[tileLocation.x][tileLocation.y];
             emptyTile.setLocation(tileLocation.x, tileLocation.y);
             tileLocations[tileLocation.x][tileLocation.y] = (boardSize.height * boardSize.width) -1;
-        }
 
+            return true;
+        }
+        return false;
     }
 
     /**
-     * Returns the order in which to draw the tiles assuming a wrapping grid with the same dimensions as boardSize
+     * Returns the order in which to draw the tiles assuming a wrapping grid with the same dimensions as boardSize.
+     * Each entry represents the number of the tile to be drawn.
      * */
     protected int[] getTileDrawOrder(){
         int[] result = new int[boardSize.width * boardSize.height];
