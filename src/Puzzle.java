@@ -15,6 +15,11 @@ public class Puzzle {
     int[][] tileLocations;  //represents which tile is located in which position (indices == x,y position, value == tile number, highest tile nr == empty spot)
     Point emptyTile; //keeps a record of where the empty tile is, so we don't have to search through tileLocations every turn
 
+    /**
+     * Constructor for Puzzle.
+     * Generates the board in a sorted state.
+     * @param boardSize board dimension
+     */
     public Puzzle(Dimension boardSize) {
         //TODO: fix non-4x4 square puzzles not working (render and turns)
         //TODO: fix non-square puzzles not working (render and turns)
@@ -26,6 +31,10 @@ public class Puzzle {
         sortBoard();
     }
 
+    /**
+     * Sorts all tiles on the game board.
+     * Places the empty tile in the bottom-right corner.
+     */
     protected void sortBoard(){
         for (int i = 0; i < (tileAmount); i++) {
             tileLocations[i/ boardSize.width][i% boardSize.height] = i;
@@ -114,6 +123,7 @@ public class Puzzle {
 
     /**
      * Returns the x,y indices (=coordinates) of the tile.
+     * @param tileNumber number of the tile to be found
      * */
     protected Point getTileByNumber(int tileNumber){
         Point result = new Point();
