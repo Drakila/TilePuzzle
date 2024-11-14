@@ -11,6 +11,7 @@ import java.util.Collections;
  */
 public class Puzzle {
     Dimension boardSize;    //playing field size measured in tiles
+    int tileAmount; //amount of total tiles on the board, including the empty one. boardSize.height * boardSize.width.
     int[][] tileLocations;  //represents which tile is located in which position (indices == x,y position, value == tile number, highest tile nr == empty spot)
     Point emptyTile; //keeps a record of where the empty tile is, so we don't have to search through tileLocations every turn
 
@@ -18,6 +19,7 @@ public class Puzzle {
         //TODO: fix non-4x4 square puzzles not working (render and turns)
         //TODO: fix non-square puzzles not working (render and turns)
         this.boardSize = boardSize;
+        this.tileAmount = boardSize.height * boardSize.width;
 
         tileLocations = new int[boardSize.width][boardSize.height];
         emptyTile = new Point(boardSize.width-1, boardSize.height-1);
@@ -25,29 +27,50 @@ public class Puzzle {
     }
 
     protected void sortBoard(){
-        for (int i = 0; i < (boardSize.width * boardSize.height); i++) {
+        for (int i = 0; i < (tileAmount); i++) {
             tileLocations[i/ boardSize.width][i% boardSize.height] = i;
         }
         emptyTile.setLocation(boardSize.width-1, boardSize.height-1);
 
     }
 
-    protected void randomizeBoard(){
-        ArrayList<Integer> numberRange = new ArrayList<>(boardSize.width* boardSize.height);
-        for (int i = 0; i < boardSize.width* boardSize.height; i++) {
-            numberRange.add(i);
+    /**
+     * Shuffle the game tiles so that the resulting state is solvable.
+     * Executes tileAmount * shuffleStrength number of random valid moves.
+     * @param shuffleStrength Scales the amount of steps taken to shuffle.
+     */
+    protected void randomizeBoard(int shuffleStrength){
+        int shuffleSteps = tileAmount * shuffleStrength;
+
+        //generate a sequence of move directions
+        ArrayList<Integer> movement = new ArrayList<>(shuffleSteps); //values 0-3 encode direction to move the empty tile (0:up, 1:right, 2:down, 3:left)
+        for (int i = 0; i < shuffleSteps; i++) {
+            movement.add(i % 4);
         }
-        Collections.shuffle(numberRange);
+        Collections.shuffle(movement);
 
-        for (int i = 0; i < (boardSize.width * boardSize.height); i++) {
-            tileLocations[i/ boardSize.width][i% boardSize.height] = numberRange.get(i);
+        //execute generated movement
+        for (int i : movement){
+            Point moveTarget = new Point(emptyTile);
+            //compute target tile from movement direction
+            //there has got to be a more efficient way to do this with some math.
+            switch (i){
+                case 0:
+                    moveTarget.y = moveTarget.y -1;
+                    break;
+                case 1:
+                    moveTarget.x = moveTarget.x +1;
+                    break;
+                case 2:
+                    moveTarget.y = moveTarget.y +1;
+                    break;
+                case 3:
+                    moveTarget.x = moveTarget.x -1;
+                    break;
+
+            }
+            moveTile(moveTarget);
         }
-
-        //update empty tile position
-        int index = numberRange.indexOf( (boardSize.width* boardSize.height)-1);
-        emptyTile.setLocation(index/boardSize.width, index%boardSize.width);
-
-
     }
 
     /**
@@ -56,13 +79,19 @@ public class Puzzle {
      * @return true if move was legal, false if move was illegal
      */
     protected boolean moveTile(Point tileLocation){
+        //verify that tile location is a valid coordinate
+        if (tileLocation.x <0 || tileLocation.x >= boardSize.width || tileLocation.y < 0 || tileLocation.y >= boardSize.height){
+            return false;
+        }
+
         int distance = Math.abs(tileLocation.x - emptyTile.x) + (Math.abs(tileLocation.y - emptyTile.y));
+
         if (1 == distance){
             // tile is adjacent to the empty tile
             //swap with empty tile
             tileLocations[emptyTile.x][emptyTile.y] = tileLocations[tileLocation.x][tileLocation.y];
             emptyTile.setLocation(tileLocation.x, tileLocation.y);
-            tileLocations[tileLocation.x][tileLocation.y] = (boardSize.height * boardSize.width) -1;
+            tileLocations[tileLocation.x][tileLocation.y] = (tileAmount) -1;
 
             return true;
         }
@@ -74,7 +103,7 @@ public class Puzzle {
      * Each entry represents the number of the tile to be drawn.
      * */
     protected int[] getTileDrawOrder(){
-        int[] result = new int[boardSize.width * boardSize.height];
+        int[] result = new int[tileAmount];
         for (int i = 0; i < boardSize.width; i++) {
             if (boardSize.height >= 0)
                 System.arraycopy(tileLocations[i], 0, result, (i * boardSize.width), boardSize.height);
