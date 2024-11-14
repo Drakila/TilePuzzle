@@ -10,19 +10,28 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/**
+ * GUI which displays the state of the Puzzle represented by puzzleState and allows for the execution of moves, shuffling and sorting of the board.
+ * Modifies puzzleState to keep consistency between state and GUI.
+ */
 public class PuzzleGUI extends JFrame{
-    //TODO: instead of calling updateGUI() manually, is it possible to watch puzzleState.tileLocations and trigger a redraw whenever that changes?
-    BufferedImage image;    //full image
+    BufferedImage image; //full image
     int tileAmount;
     ImageIcon[] tileIcons; //parts of the full image, index corresponds to the tile number
     Dimension imageSize;
     Dimension windowSize;
-    // reference to assigned Puzzle instance which manages the board state
-    Puzzle puzzleState;
+
+    Puzzle puzzleState; // reference to assigned Puzzle instance which manages the board state
 
     GameBoard puzzlePanel;
     ControlPanel controlPanel;
 
+    /**
+     * Constructs and displays the puzzle's GUI.
+     * Loads the image at imagePath to use as the puzzle image.
+     * @param imagePath absolute path to the puzzle image
+     * @param puzzleState Puzzle instance which manages the position and movement of puzzle tiles
+     */
     public PuzzleGUI(Path imagePath, Puzzle puzzleState){
         //NOTE: this is one beefy constructor
 
@@ -37,6 +46,7 @@ public class PuzzleGUI extends JFrame{
         imageSize = new Dimension(image.getWidth(this), image.getHeight(this));
 
         //generate tile icons
+        //TODO: extract into method
         this.tileIcons = new ImageIcon[tileAmount];
 
         int boardWidth = puzzleState.boardSize.width;
@@ -48,6 +58,7 @@ public class PuzzleGUI extends JFrame{
             int y = (i/puzzleState.boardSize.height)*(tileHeight);
             tileIcons[i] = new ImageIcon(image.getSubimage(x,y,tileWidth,tileHeight));
         }
+        //add empty tile
         tileIcons[tileIcons.length-1] = new ImageIcon(new BufferedImage(tileWidth, tileHeight, 5));
 
         //determine window size
@@ -59,8 +70,8 @@ public class PuzzleGUI extends JFrame{
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.getContentPane().setBackground(Color.darkGray);
         this.setSize(windowSize);
-        //getContentPane is necessary because setLayout automatically sets the Layout for the content pane, not the JFrame
-        //and the target needs to match ala "target.setLayout(new BoxLayout(target, axis))"
+        //getContentPane is necessary because setLayout automatically sets the Layout for the content pane, not the JFrame,
+        // and the target needs to match ala "target.setLayout(new BoxLayout(target, axis))"
         this.setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
 
         //construct window layout
@@ -76,7 +87,7 @@ public class PuzzleGUI extends JFrame{
 
     /**
     * Reads and returns the image located at imagePath.
-    * imagePath: absolute path to the image which will be used as the puzzle.
+    * @param imagePath absolute path to the image which will be used as the puzzle
     */
     private BufferedImage loadImage(Path imagePath){
         BufferedImage loadedImage = null;
@@ -93,7 +104,7 @@ public class PuzzleGUI extends JFrame{
     }
 
     /**
-     * Panel which displays the current state of the puzzle using GameTiles
+     * JPanel which displays the current state of the puzzle using GameTiles
      * */
     private class GameBoard extends JPanel{
         //list of tiles on the board, in order of tileNumber
@@ -163,6 +174,12 @@ public class PuzzleGUI extends JFrame{
         int tileNumber;
         final GameBoard gameBoard;
 
+        /**
+         * Instantiates a GameTile object.
+         * @param icon the part of the puzzle image belonging to this tile
+         * @param tileNumber number identifying which tile is being displayed
+         * @param gameBoard reference to the gameBoard the tile belongs to
+         */
         public GameTile(ImageIcon icon, int tileNumber, GameBoard gameBoard) {
             this.icon = icon;
             picture = new JLabel(icon);
@@ -227,10 +244,18 @@ public class PuzzleGUI extends JFrame{
         }
     }
 
+    /**
+     * JPanel which displays the "Shuffle" and "Sort" Buttons to start and stop a game.
+     */
     private class ControlPanel extends JPanel implements ActionListener{
         JButton shuffleButton;
         JButton sortButton;
         GameBoard controlledGame;
+
+        /**
+         * Constructor for ControlPanel.
+         * @param controlledGame reference to the puzzle
+         */
         public ControlPanel(GameBoard controlledGame){
             this.controlledGame = controlledGame;
 
