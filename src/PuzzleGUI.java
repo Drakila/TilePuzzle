@@ -234,7 +234,7 @@ public class PuzzleGUI extends JFrame{
         public ControlPanel(GameBoard controlledGame){
             this.controlledGame = controlledGame;
 
-            shuffleButton = new JButton("Start");
+            shuffleButton = new JButton("Shuffle");
             shuffleButton.addActionListener(this);
             sortButton = new JButton("Sort");
             sortButton.addActionListener(this);
@@ -247,7 +247,7 @@ public class PuzzleGUI extends JFrame{
         public void actionPerformed(ActionEvent e) {
             Object source = e.getSource();
             if (source == shuffleButton){
-                puzzleState.randomizeBoard();
+                puzzleState.randomizeBoard(10);
                 controlledGame.redraw();
             } else if (source == sortButton) {
                 puzzleState.sortBoard();
