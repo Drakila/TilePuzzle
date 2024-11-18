@@ -53,16 +53,16 @@ class PuzzleTest {
             //Assumption: empty tile is in bottom-right corner after initialization
 
             puzzle.moveTile(new Point(2,3));
-            assertEquals(puzzle.tileAmount-1, puzzle.tileLocations[2][3]);
+            assertEquals(15, puzzle.tileLocations[2][3]);
             assertEquals(new Point(2,3), puzzle.emptyTile);
 
         }
 
         @Test
-        @DisplayName("Moved Tile moves")
+        @DisplayName("Correct Tile moves")
         void moveTileTwo(){
-            int movedTile = puzzle.tileLocations[2][3];
-            puzzle.moveTile(new Point(2,3));
+            int movedTile = 11;
+            puzzle.moveTile(new Point(3,2));
             assertEquals(movedTile, puzzle.tileLocations[3][3]);
 
         }
@@ -97,12 +97,6 @@ class PuzzleTest {
             }
         }
 
-        @Test
-        @DisplayName("Correct Tile moves")
-        void moveTileFive(){
-
-        }
-
         /*
         getTileDrawOrder Tests
         check:
@@ -114,7 +108,7 @@ class PuzzleTest {
         @DisplayName("Draw Order length")
         void drawOrderOne() {
             int[] order = puzzle.getTileDrawOrder();
-            assertEquals( puzzle.tileAmount, order.length);
+            assertEquals( 16, order.length);
         }
 
         @Test
@@ -132,9 +126,9 @@ class PuzzleTest {
             //to catch a potential case where getTileDrawOrder always returns the initial, sorted array
         void drawOrderThree() {
             //don't use randomness, since that would necessitate logic akin to the production logic to compute the expected order
-            assumeTrue( puzzle.moveTile(new Point(3,2)));    //switches tiles 15 and 11
+            puzzle.tileLocations[3] = new int[]{3, 7, 15, 11};  //changes board state to have tiles 11 and 15 switched
             int[] order = puzzle.getTileDrawOrder();
-            int[] expectedOrder = {0,1,2,3,4,5,6,7,8,9,10,14,12,13,11,15};
+            int[] expectedOrder = {0,1,2,3,4,5,6,7,8,9,10,15,12,13,14,11};
             assertArrayEquals(expectedOrder, order);
         }
 
