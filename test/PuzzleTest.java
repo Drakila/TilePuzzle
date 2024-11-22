@@ -3,6 +3,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,7 +44,53 @@ class PuzzleTest {
     - non-legal move is not executed
      */
     @Test
-    void moveTile() {
+    @DisplayName("Empty Tile moves")
+    void moveTileOne() {
+        //Assumption: empty tile is in bottom-right corner after initialization
+
+        puzzle.moveTile(new Point(2,3));
+        assertEquals(puzzle.tileAmount-1, puzzle.tileLocations[2][3]);
+        assertEquals(new Point(2,3), puzzle.emptyTile);
+
+    }
+
+    @Test
+    @DisplayName("Moved Tile moves")
+    void moveTileTwo(){
+        int movedTile = puzzle.tileLocations[2][3];
+        puzzle.moveTile(new Point(2,3));
+        assertEquals(movedTile, puzzle.tileLocations[3][3]);
+
+    }
+
+    @Test
+    @DisplayName("Invalid move (too far from empty Tile)")
+    void moveTileThree(){
+        //make deep copy of the tile Locations
+        int[][] stateCopy = Arrays.stream(puzzle.tileLocations).map(int[]::clone).toArray(int[][]::new);
+
+        //attempt invalid move
+        puzzle.moveTile(new Point(1,1));
+
+        //verify board state has not changed
+        for (int i = 0; i < puzzle.boardSize.width; i++) {
+            assertArrayEquals(stateCopy[i], puzzle.tileLocations[i]);
+        }
+    }
+
+    @Test
+    @DisplayName("Invalid move (outside of board)")
+    void moveTileFour(){
+        //make deep copy of the tile Locations
+        int[][] stateCopy = Arrays.stream(puzzle.tileLocations).map(int[]::clone).toArray(int[][]::new);
+
+        //attempt invalid move
+        puzzle.moveTile(new Point(puzzle.boardSize.width,3));
+
+        //verify board state has not changed
+        for (int i = 0; i < puzzle.boardSize.width; i++) {
+            assertArrayEquals(stateCopy[i], puzzle.tileLocations[i]);
+        }
     }
 
     @Test
