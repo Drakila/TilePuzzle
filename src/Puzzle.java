@@ -37,7 +37,7 @@ public class Puzzle {
      */
     protected void sortBoard(){
         for (int i = 0; i < (tileAmount); i++) {
-            tileLocations[i/ boardSize.width][i% boardSize.height] = i;
+            tileLocations[i% boardSize.width][i/ boardSize.height] = i;
         }
         emptyTile.setLocation(boardSize.width-1, boardSize.height-1);
 
@@ -113,10 +113,11 @@ public class Puzzle {
      * */
     protected int[] getTileDrawOrder(){
         int[] result = new int[tileAmount];
-        for (int i = 0; i < boardSize.width; i++) {
-            if (boardSize.height >= 0)
-                System.arraycopy(tileLocations[i], 0, result, (i * boardSize.width), boardSize.height);
 
+        for (int i = 0; i < boardSize.height; i++) {
+            for (int j = 0; j < boardSize.width; j++) {
+                result[j+(i* boardSize.width)] = tileLocations[j][i];
+            }
         }
         return result;
     }
