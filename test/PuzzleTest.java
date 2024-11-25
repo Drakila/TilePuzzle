@@ -1,11 +1,9 @@
 import org.junit.jupiter.api.*;
 
 import java.awt.*;
-import java.sql.Array;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class PuzzleTest {
     //TODO: run the tests on Puzzles of different sizes. Minimum size: 3x3.
@@ -14,7 +12,6 @@ class PuzzleTest {
 
     @Nested
     class FourByFourTests{
-        int[] sortedOrder = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
         @BeforeEach
         void setUp(){
