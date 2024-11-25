@@ -121,7 +121,6 @@ class PuzzleTest {
 
 
         @Test
-        @Disabled
         @DisplayName("Draw Order not inital")
             //to catch a potential case where getTileDrawOrder always returns the initial, sorted array
         void drawOrderThree() {
@@ -133,13 +132,20 @@ class PuzzleTest {
         }
 
         /*
-        getTileNyNumber tests
+        getTileByNumber tests
         check:
-        -
+        - correct location
          */
         @Test
+        @DisplayName("get Tile by Number in non-initial state")
         void getTileByNumber() {
+            puzzle.tileLocations[0] = new int[]{0,4,8,6};
+            puzzle.tileLocations[2] = new int[]{2,12,10,14};
+            Point expectedLocation = new Point(2,1);
+            Point actualLocation = puzzle.getTileByNumber(12);
+            assertEquals(expectedLocation, actualLocation);
         }
+
     }
 
 
